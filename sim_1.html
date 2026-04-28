@@ -1,0 +1,282 @@
+<!--
+[META INFORMATION]
+Palette: "Wealth & Focus" (Dark background #020617, Vibrant Green #22c55e, Golden Accent #f59e0b, Alert Red #ef4444)
+Narrative Plan:
+1. Direct Translation: Clearly show that "10,000 yen x 5 times = 50,000 yen/month investment".
+2. Opportunity Cost Visualization: Compare the absolute loss of gambling against the compound growth of an index fund.
+3. Lifestyle Milestones: Show what the accumulated wealth buys (e.g., Luxury Car, House Down Payment, Retirement Fund).
+[CONFIRMATION]
+NEITHER Mermaid JS NOR SVG were used. All charts use Chart.js (Canvas).
+-->
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ギャンブル軍資金・積立転換シミュレーター</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap');
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background-color: #020617;
+            color: #f8fafc;
+        }
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 400px;
+        }
+        .highlight-green { color: #22c55e; }
+        .highlight-red { color: #ef4444; }
+        .highlight-gold { color: #f59e0b; }
+    </style>
+</head>
+<body class="p-4 md:p-10">
+    <div class="max-w-5xl mx-auto">
+        <header class="text-center mb-12">
+            <h1 class="text-3xl md:text-5xl font-black mb-4 tracking-tighter">
+                負債の種を、<span class="text-green-500">富の種</span>へ。
+            </h1>
+            <p class="text-slate-400 text-lg">ギャンブルに使っていた「軍資金」が、20年後にいくらになるか知っていますか？</p>
+        </header>
+
+        <!-- Main Interface -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- Inputs -->
+            <div class="lg:col-span-4 space-y-6">
+                <div class="glass-panel p-6 rounded-3xl shadow-2xl">
+                    <h2 class="text-xl font-bold mb-6 flex items-center">
+                        <span class="bg-blue-600 p-2 rounded-lg mr-3">💰</span>
+                        習慣の入力
+                    </h2>
+                    
+                    <div class="space-y-5">
+                        <div>
+                            <label class="block text-sm text-slate-400 mb-2">1回の平均使用額 (軍資金)</label>
+                            <div class="relative">
+                                <span class="absolute left-4 top-2.5 text-slate-500">¥</span>
+                                <input type="number" id="unitPrice" value="10000" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl py-3 pl-8 pr-4 focus:ring-2 focus:ring-green-500 outline-none transition-all text-xl font-bold">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm text-slate-400 mb-2">月間の頻度 (行く回数)</label>
+                            <input type="range" id="freqRange" min="1" max="30" value="5" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-green-500">
+                            <div class="flex justify-between mt-2">
+                                <span class="text-xs text-slate-500">1回</span>
+                                <span id="freqDisplay" class="text-green-400 font-black">月 5 回</span>
+                                <span class="text-xs text-slate-500">30回</span>
+                            </div>
+                        </div>
+
+                        <div class="pt-6 border-t border-slate-800">
+                            <div class="bg-slate-900/80 p-4 rounded-2xl border border-blue-500/30">
+                                <p class="text-xs text-blue-400 uppercase font-bold mb-1">あなたの月間積立可能額</p>
+                                <div class="text-2xl font-black text-white" id="monthlyTotalDisplay">¥50,000</div>
+                                <p class="text-[10px] text-slate-500 mt-1">※ギャンブルを止めるだけで作れる資産の種</p>
+                            </div>
+                        </div>
+
+                        <div class="pt-2">
+                            <label class="block text-sm text-slate-400 mb-2">想定年利 (世界経済成長率)</label>
+                            <select id="annualReturn" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl py-3 px-4 focus:ring-2 focus:ring-green-500 outline-none">
+                                <option value="0.03">3% (保守的)</option>
+                                <option value="0.05" selected>5% (標準的)</option>
+                                <option value="0.07">7% (積極的・米国株等)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-green-600 to-emerald-800 p-6 rounded-3xl shadow-xl">
+                    <h3 class="font-bold text-white mb-2">💡 景色を変えるヒント</h3>
+                    <p class="text-green-100 text-xs leading-relaxed">
+                        パチンコ台の前に座る時間を、証券口座の管理画面を見る時間に変えましょう。数字が「減る恐怖」ではなく「増える喜び」に変わったとき、依存症は克服されます。
+                    </p>
+                </div>
+            </div>
+
+            <!-- Dashboard -->
+            <div class="lg:col-span-8 space-y-6">
+                
+                <!-- Metrics -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="glass-panel p-5 rounded-2xl border-l-4 border-red-500">
+                        <p class="text-xs text-slate-400 mb-1">10年後の「ドブ捨て額」</p>
+                        <div class="text-xl font-bold text-red-400" id="statLoss">¥6,000,000</div>
+                        <p class="text-[10px] text-slate-500">※期待値回収なしの場合</p>
+                    </div>
+                    <div class="glass-panel p-5 rounded-2xl border-l-4 border-green-500">
+                        <p class="text-xs text-slate-400 mb-1">10年後の積立資産</p>
+                        <div class="text-xl font-bold text-green-400" id="statWealth10">¥7,760,000</div>
+                        <p class="text-[10px] text-slate-500">※元本+複利</p>
+                    </div>
+                    <div class="glass-panel p-5 rounded-2xl border-l-4 border-amber-500">
+                        <p class="text-xs text-slate-400 mb-1">20年後の最終景色</p>
+                        <div class="text-xl font-bold text-amber-400" id="statWealth20">¥20,550,000</div>
+                        <p class="text-[10px] text-slate-500">※老後2000万円問題解決</p>
+                    </div>
+                </div>
+
+                <!-- Main Visualization -->
+                <div class="glass-panel p-6 rounded-3xl relative overflow-hidden">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="font-black text-xl">資産成長のシミュレーション</h3>
+                        <div class="flex space-x-4 text-xs">
+                            <span class="flex items-center"><span class="w-3 h-3 bg-green-500 rounded-full mr-1"></span> 投資資産</span>
+                            <span class="flex items-center"><span class="w-3 h-3 bg-red-500 rounded-full mr-1"></span> ギャンブル損失</span>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="mainChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Comparison Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-red-950/20 border border-red-900/50 p-6 rounded-3xl">
+                        <h4 class="text-red-500 font-bold mb-3 flex items-center">
+                            <span class="mr-2">💀</span> そのまま続けた未来
+                        </h4>
+                        <p class="text-sm text-slate-300 leading-relaxed">
+                            20年間で合計 <span id="totalLossLabel" class="text-red-400 font-bold">1,200万円</span> を消費します。手元には何も残らず、失ったのはお金だけでなく「健康的な時間」と「精神的な平穏」です。
+                        </p>
+                    </div>
+                    <div class="bg-green-950/20 border border-green-900/50 p-6 rounded-3xl">
+                        <h4 class="text-green-500 font-bold mb-3 flex items-center">
+                            <span class="mr-2">🚀</span> 投資に切り替えた未来
+                        </h4>
+                        <p class="text-sm text-slate-300 leading-relaxed">
+                            20年後には <span id="totalWealthLabel" class="text-green-400 font-bold">2,055万円</span> の資産に。これは退職金に匹敵する額です。あなたは「借金して利息を払う側」から「世界中の企業のオーナーとして利益を受け取る側」に回りました。
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const ctx = document.getElementById('mainChart').getContext('2d');
+        let myChart;
+
+        const formatYen = (num) => "¥" + Math.round(num).toLocaleString();
+
+        const calculate = () => {
+            const unitPrice = parseFloat(document.getElementById('unitPrice').value) || 0;
+            const frequency = parseFloat(document.getElementById('freqRange').value);
+            const rate = parseFloat(document.getElementById('annualReturn').value);
+            
+            const monthlyInvest = unitPrice * frequency;
+            document.getElementById('freqDisplay').textContent = `月 ${frequency} 回`;
+            document.getElementById('monthlyTotalDisplay').textContent = formatYen(monthlyInvest);
+
+            const years = 20;
+            const labels = Array.from({length: years + 1}, (_, i) => i + "年");
+            const wealthData = [];
+            const lossData = [];
+
+            for (let y = 0; y <= years; y++) {
+                // Wealth calculation (FV of annuity)
+                if (y === 0) {
+                    wealthData.push(0);
+                    lossData.push(0);
+                } else {
+                    const fv = monthlyInvest * 12 * ((Math.pow(1 + rate, y) - 1) / rate);
+                    wealthData.push(fv);
+                    
+                    // Simple cumulative loss (assuming 100% loss of the principal to visualize opportunity cost)
+                    lossData.push(-(monthlyInvest * 12 * y));
+                }
+            }
+
+            // Update Stats
+            document.getElementById('statLoss').textContent = formatYen(Math.abs(lossData[10]));
+            document.getElementById('statWealth10').textContent = formatYen(wealthData[10]);
+            document.getElementById('statWealth20').textContent = formatYen(wealthData[20]);
+            document.getElementById('totalLossLabel').textContent = formatYen(Math.abs(lossData[20]));
+            document.getElementById('totalWealthLabel').textContent = formatYen(wealthData[20]);
+
+            updateChart(labels, wealthData, lossData);
+        };
+
+        const updateChart = (labels, wealth, loss) => {
+            if (myChart) myChart.destroy();
+
+            myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: '投資資産 (積み上がる将来)',
+                            data: wealth,
+                            borderColor: '#22c55e',
+                            backgroundColor: 'rgba(34, 197, 94, 0.2)',
+                            borderWidth: 4,
+                            pointBackgroundColor: '#22c55e',
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: '累積損失 (消え去るお金)',
+                            data: loss,
+                            borderColor: '#ef4444',
+                            backgroundColor: 'rgba(239, 68, 68, 0.2)',
+                            borderWidth: 4,
+                            pointBackgroundColor: '#ef4444',
+                            fill: true,
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { 
+                                color: '#94a3b8',
+                                callback: (value) => value.toLocaleString() + '円'
+                            }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#94a3b8' }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#0f172a',
+                            titleFont: { size: 16 },
+                            bodyFont: { size: 14 },
+                            padding: 12,
+                            displayColors: true,
+                            callbacks: {
+                                label: (item) => item.dataset.label + ': ' + formatYen(Math.abs(item.raw))
+                            }
+                        }
+                    }
+                }
+            });
+        };
+
+        // Listeners
+        document.getElementById('unitPrice').addEventListener('input', calculate);
+        document.getElementById('freqRange').addEventListener('input', calculate);
+        document.getElementById('annualReturn').addEventListener('change', calculate);
+
+        // Init
+        window.onload = calculate;
+    </script>
+</body>
+</html>
