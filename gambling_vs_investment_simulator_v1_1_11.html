@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ギャンブル vs 投資 シミュレーター</title>
+<style>
+:root{
+  --p50:#F0EFFF;--p100:#CECBF6;--p200:#AFA9EC;--p400:#7F77DD;
+  --p600:#534AB7;--p800:#3C3489;--p900:#26215C;
+  --c50:#FFF5F0;--c800:#712B13;
+  --t50:#E1F5EE;--t600:#0F6E56;--t800:#085041;
+  --g50:#F8F8F6;--g100:#EDEDEB;--g800:#2C2C2A;
+  --a50:#FAEEDA;--a100:#FAC775;--a600:#BA7517;--a800:#633806;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{font-family:'Hiragino Sans','Noto Sans JP',sans-serif;background:#F4F3FF;color:var(--g800);display:flex;flex-direction:column;min-height:100vh;}
+.header{background:#fff;border-bottom:1.5px solid var(--p100);padding:.85rem 1.25rem;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:1rem;}
+.hl{display:flex;align-items:center;gap:.75rem;}
+.hicon{width:34px;height:34px;border-radius:9px;background:var(--p600);display:flex;align-items:center;justify-content:center;font-size:17px;}
+.ht{font-size:15px;font-weight:700;color:var(--p900);}
+.hs{font-size:10px;color:var(--p600);}
+.hr{display:flex;gap:5px;flex-shrink:0;}
+.sbtn{display:inline-flex;align-items:center;gap:4px;padding:5px 10px;font-size:11px;border-radius:8px;border:none;cursor:pointer;font-weight:700;font-family:inherit;white-space:nowrap;}
+.sbtn:hover{opacity:.85;}
+.sb-x{background:#000;color:#fff;}
+.sb-fb{background:#1877F2;color:#fff;}
+.sb-ig{background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);color:#fff;}
+.sb-line{background:#06C755;color:#fff;}
+.main{display:grid;grid-template-columns:310px 1fr;flex:1;overflow:hidden;}
+.left{background:#fff;border-right:1.5px solid var(--p100);overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:.8rem;}
+.sl{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--p600);margin-bottom:.5rem;}
+
+.sg{margin-bottom:.8rem;}
+.sg:last-child{margin-bottom:0;}
+.sgt{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:2px;}
+.sgl{font-size:13px;font-weight:500;}
+.sgv{font-family:'Courier New',monospace;font-size:15px;font-weight:700;}
+.sgv.neg{color:#C04020;}
+.sgv.pos{color:var(--t600);}
+.sgv.zer{color:#888;}
+.sgh{font-size:10px;color:#999;margin-bottom:4px;line-height:1.4;}
+.swrap{position:relative;padding-bottom:22px;}
+input[type=range]{width:100%;height:4px;border-radius:2px;appearance:none;background:var(--p100);outline:none;cursor:pointer;display:block;margin-top:3px;}
+input[type=range]::-webkit-slider-thumb{appearance:none;width:18px;height:18px;border-radius:50%;background:var(--p600);cursor:pointer;border:2px solid #fff;box-shadow:0 1px 4px rgba(83,74,183,.35);}
+.tabs{position:absolute;bottom:0;left:0;right:0;height:20px;}
+.tabs span{position:absolute;transform:translateX(-50%);font-size:9px;color:#bbb;cursor:pointer;line-height:1.2;white-space:nowrap;text-align:center;}
+.tabs span:hover{color:var(--p600);}
+.tabs span.hn{color:#C04020;font-weight:700;}
+.tabs span.hz{color:#888;font-weight:700;}
+.tabs span.hp{color:var(--t600);font-weight:700;}
+.tsub{font-size:8px;display:block;}
+.badge{font-size:10px;margin-top:5px;border-radius:5px;padding:4px 8px;display:block;font-weight:500;line-height:1.5;}
+.bd{color:var(--a800);background:var(--a50);}
+.bg{color:var(--t800);background:var(--t50);}
+.bn{color:#555;background:var(--g50);}
+.bi{color:var(--p800);background:var(--p50);}
+.div{border:none;border-top:1px solid var(--g100);}
+.rcards{display:flex;flex-direction:column;gap:6px;}
+.rc{border-radius:10px;padding:8px 10px;}
+.rc.n{background:var(--g50);border:1.5px solid var(--g100);}
+.rc.b{background:var(--c50);border:1.5px solid #FBBEA4;}
+.rc.g{background:var(--t50);border:1.5px solid #9FE1CB;}
+.rc .rl{font-size:10px;font-weight:700;letter-spacing:.05em;margin-bottom:2px;}
+.rc.n .rl{color:#666;}.rc.b .rl{color:var(--c800);}.rc.g .rl{color:var(--t800);}
+.rc .ra{font-family:'Courier New',monospace;font-size:18px;font-weight:500;line-height:1.2;}
+.rc.n .ra{color:var(--g800);}.rc.b .ra{color:#C04020;}.rc.g .ra{color:var(--t600);}
+.rc .rn{font-size:10px;margin-top:1px;}
+.rc.n .rn{color:#888;}.rc.b .rn{color:var(--c800);opacity:.8;}.rc.g .rn{color:var(--t800);opacity:.8;}
+.diffbox{background:var(--p50);border:1.5px solid var(--p100);border-radius:10px;padding:8px 10px;}
+.diffbox .dl{font-size:11px;color:var(--p800);}
+.diffbox .da{font-family:'Courier New',monospace;font-size:20px;font-weight:500;color:var(--p900);}
+.diffbox .ds{font-size:10px;color:var(--p600);}
+.right{display:flex;flex-direction:column;overflow:hidden;padding:1rem;gap:.8rem;}
+.cc{background:#fff;border-radius:12px;border:1.5px solid var(--p100);padding:1rem;flex:1;display:flex;flex-direction:column;min-height:0;}
+.chd{display:flex;justify-content:space-between;align-items:center;margin-bottom:.8rem;flex-wrap:wrap;gap:.5rem;}
+.chd h2{font-size:13px;font-weight:700;color:var(--p900);}
+.lgd{display:flex;gap:.6rem;flex-wrap:wrap;}
+.li{display:flex;align-items:center;gap:4px;font-size:10px;color:#666;}
+.ld{width:8px;height:8px;border-radius:50%;}
+.cw{flex:1;position:relative;min-height:0;}
+canvas{position:absolute;top:0;left:0;width:100%!important;height:100%!important;}
+.tc{background:#fff;border-radius:12px;border:1.5px solid var(--p100);padding:1rem;flex-shrink:0;}
+.thd{display:flex;justify-content:space-between;align-items:center;margin-bottom:.6rem;flex-wrap:wrap;gap:.4rem;}
+.thd h2{font-size:12px;font-weight:700;color:var(--p900);}
+.trow{display:flex;gap:5px;}
+.tbtn{padding:3px 10px;font-size:10px;font-family:inherit;border-radius:999px;border:1.5px solid var(--p200);background:transparent;color:var(--p600);cursor:pointer;transition:all .15s;font-weight:500;}
+.tbtn.active{background:var(--p600);color:#fff;border-color:var(--p600);}
+.dt{width:100%;border-collapse:collapse;font-size:10px;}
+.dt th{font-size:9px;font-weight:700;color:#999;text-align:right;padding:3px 6px;border-bottom:1.5px solid var(--g100);}
+.dt th:first-child{text-align:left;}
+.dt td{padding:4px 6px;text-align:right;border-bottom:.5px solid var(--g100);font-family:'Courier New',monospace;font-size:10px;}
+.dt td:first-child{text-align:left;font-family:inherit;color:#666;}
+.dt tr:last-child td{border-bottom:none;}
+.dt tr:nth-child(5n) td{background:var(--p50);}
+.ci{color:var(--t600);font-weight:500;}.cg{color:#C04020;}
+.wbar{background:var(--a50);border-top:1.5px solid var(--a100);padding:.5rem 1.1rem;font-size:10px;color:var(--a800);line-height:1.6;flex-shrink:0;}
+.wbar strong{color:var(--a600);font-weight:700;}
+.mbg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;align-items:center;justify-content:center;padding:1rem;}
+.mbg.open{display:flex;}
+.modal{background:#fff;border-radius:20px;padding:1.5rem;max-width:340px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,.25);max-height:90vh;overflow-y:auto;}
+.modal h2{font-size:16px;font-weight:700;color:var(--p900);margin-bottom:.2rem;}
+.msub{font-size:11px;color:#999;margin-bottom:.9rem;}
+
+.mstats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:.9rem;}
+.mst{border-radius:10px;padding:10px;}
+.mst.bad{background:var(--c50);border:1.5px solid #FBBEA4;}
+.mst.gd{background:var(--t50);border:1.5px solid #9FE1CB;}
+.msl{font-size:10px;font-weight:700;margin-bottom:3px;}
+.mst.bad .msl{color:var(--c800);}.mst.gd .msl{color:var(--t800);}
+.msv{font-family:'Courier New',monospace;font-size:17px;font-weight:500;}
+.mst.bad .msv{color:#C04020;}.mst.gd .msv{color:var(--t600);}
+.msns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:.9rem;}
+.snsbtn{display:flex;align-items:center;justify-content:center;gap:6px;padding:11px;border-radius:10px;border:none;cursor:pointer;font-size:13px;font-weight:700;font-family:inherit;}
+.snsbtn:hover{opacity:.85;}
+.snsX{background:#000;color:#fff;}
+.snsFb{background:#1877F2;color:#fff;}
+.snsIg{background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);color:#fff;}
+.snsLine{background:#06C755;color:#fff;}
+.mcls{width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--g100);background:var(--g50);color:#555;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;}
+.mcls:hover{background:var(--g100);}
+.sb-pdf{background:#534AB7;color:#fff;}
+.sb-pdf:hover{background:#3C3489;}
+@media print{
+  .header-right,.wbar,.sbtn,.tbrow{display:none!important;}
+  body{background:#fff;}
+  .main{grid-template-columns:300px 1fr;height:auto;overflow:visible;}
+  .left,.right{overflow:visible;}
+  .right{min-height:700px;}
+  .cc{min-height:350px;page-break-inside:avoid;}
+  .tc{page-break-inside:avoid;}
+}
+@media(max-width:860px){
+  .main{grid-template-columns:1fr;}
+  .left{border-right:none;border-bottom:1.5px solid var(--p100);overflow-y:visible;}
+  .right{min-height:500px;}
+  .cc{min-height:240px;}
+  .ht{font-size:12px;}
+  .sbtn span{display:none;}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="hl">
+    <div class="hicon">🎰</div>
+    <div>
+      <div class="ht">ギャンブル vs 投資 シミュレーター</div>
+      <div class="hs">毎月の損益を投資に回したら、将来どれだけ変わる？</div>
+    </div>
+  </div>
+  <div class="hr">
+    <button class="sbtn sb-x" onclick="openShare()">𝕏 <span>シェア</span></button>
+    <button class="sbtn sb-fb" onclick="openShare()">f <span>シェア</span></button>
+    <button class="sbtn sb-ig" onclick="openShare()">📷 <span>シェア</span></button>
+    <button class="sbtn sb-line" onclick="openShare()">LINE <span>シェア</span></button>
+    <button class="sbtn sb-pdf" onclick="window.print()">📄 <span>PDF</span></button>
+  </div>
+</div>
+
+<div class="main">
+  <div class="left">
+
+    <div>
+      <div class="sl">🎰 ギャンブル設定</div>
+      <div class="sg">
+        <div class="sgt">
+          <span class="sgl">月間の損益</span>
+          <span class="sgv neg" id="monthly-val">-5万</span>
+        </div>
+        <div class="sgh">毎月ギャンブルで失う金額（0円＝損失なし）</div>
+        <div class="swrap">
+          <input type="range" id="monthly" min="-400000" max="0" step="10000" value="-50000">
+          <div class="tabs" id="tabs-monthly"></div>
+        </div>
+        <span class="badge bd" id="loss-badge">📌 月5万円の負け = 年間60万円が消えています</span>
+      </div>
+    </div>
+
+    <div class="div"></div>
+
+    <div>
+      <div class="sl">💳 借金の状況</div>
+      <div class="sg">
+        <div class="sgt">
+          <span class="sgl">借金の総額</span>
+          <span class="sgv neg" id="debt-val">0円</span>
+        </div>
+        <div class="sgh">現在の借金残高（消費者金融・カードローン等）</div>
+        <div class="swrap">
+          <input type="range" id="debt" min="0" max="10000000" step="100000" value="0">
+          <div class="tabs" id="tabs-debt"></div>
+        </div>
+        <span class="badge bd" id="debt-badge">📌 借金なし</span>
+      </div>
+      <div class="sg">
+        <div class="sgt">
+          <span class="sgl">借金の年利（金利）</span>
+          <span class="sgv neg" id="debtrate-val">18.0%</span>
+        </div>
+        <div class="sgh">消費者金融は15〜18%、カードローンは12〜18%が一般的</div>
+        <div class="swrap">
+          <input type="range" id="debtrate" min="3" max="20" step="0.5" value="18">
+          <div class="tabs" id="tabs-debtrate"></div>
+        </div>
+        <span class="badge bd" id="debtrate-badge">📌 消費者金融の上限金利（利息制限法）：年18%</span>
+      </div>
+    </div>
+
+    <div class="div"></div>
+
+    <div>
+      <div class="sl">📈 投資設定</div>
+      <div class="sg">
+        <div class="sgt">
+          <span class="sgl">年利（想定リターン）</span>
+          <span class="sgv" id="rate-val" style="color:var(--p800)">7.0%</span>
+        </div>
+        <div class="sgh">長期積み立ての年間平均リターン（過去実績ベース）</div>
+        <div class="swrap">
+          <input type="range" id="rate" min="2" max="12" step="0.5" value="7">
+          <div class="tabs" id="tabs-rate"></div>
+        </div>
+        <span class="badge bi" id="rate-badge">📌 オルカン（全世界株式）：過去30年の長期平均実績</span>
+      </div>
+      <div class="sg">
+        <div class="sgt">
+          <span class="sgl">シミュレーション期間</span>
+          <span class="sgv" id="years-val" style="color:var(--p800)">20年</span>
+        </div>
+        <div class="sgh">続けるほど複利の力が大きくなります</div>
+        <div class="swrap">
+          <input type="range" id="years" min="5" max="40" step="1" value="20">
+          <div class="tabs" id="tabs-years"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="div"></div>
+    <div style="padding:.2rem 0 .4rem;font-size:10px;font-weight:700;letter-spacing:.08em;color:#aaa;text-transform:uppercase;">📊 シミュレーション結果</div>
+    <div class="rcards">
+      <div class="rc b"><div class="rl">ギャンブル 累計損失</div><div class="ra" id="r-total">0円</div><div class="rn">ギャンブルで消えたお金（全額損失）</div></div>
+      <div class="rc g"><div class="rl">投資に回した場合</div><div class="ra" id="r-invest">0円</div><div class="rn" id="r-isub">複利効果を含む</div></div>
+    </div>
+
+    <div class="diffbox">
+      <div class="dl">投資に回していたら今頃…</div>
+      <div class="da" id="r-diff">+0円</div>
+      <div class="ds">ギャンブルの損失額 + 投資で増えた額の合計</div>
+    </div>
+
+  </div>
+
+  <div class="right">
+    <div class="cc">
+      <div class="chd">
+        <h2>資産推移グラフ</h2>
+        <div class="lgd">
+          <div class="li"><div class="ld" style="background:rgba(46,180,46,.7)"></div>複利益（増えた分）</div>
+          <div class="li"><div class="ld" style="background:rgba(46,139,46,.3)"></div>元本（投入分）</div>
+          <div class="li"><div class="ld" style="background:#C04020"></div>ギャンブル（損失）</div>
+          <div class="li"><div class="ld" style="background:#AFA9EC;border:1px dashed #534AB7"></div>ギャンブル損失累計</div>
+        </div>
+      </div>
+      <div class="cw"><canvas id="main-chart"></canvas></div>
+    </div>
+    <div class="tc">
+      <div class="thd">
+        <h2>年別詳細データ</h2>
+        <div class="trow">
+          <button class="tbtn active" onclick="setStepSafe(5)">5年ごと</button>
+          <button class="tbtn" onclick="setStepSafe(1)">毎年</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="dt">
+          <thead><tr>
+            <th>経過</th><th>累計損失</th><th>投資 資産</th><th>含み益</th><th>ギャンブル損失</th>
+          </tr></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="wbar"><strong>注意：</strong>このシミュレーターはあくまで参考値です。投資は元本保証ではありません。過去の実績は将来を保証するものではありません。</div>
+
+<div class="mbg" id="mbg" onclick="if(event.target===this)closeShare()">
+  <div class="modal">
+    <h2>📊 結果をシェアする</h2>
+    <p class="msub">あなたのシミュレーション結果</p>
+
+    <div class="mstats">
+      <div class="mst bad"><div class="msl">ギャンブル累計損失</div><div class="msv" id="m-gamble">0円</div></div>
+      <div class="mst gd"><div class="msl">投資に回したら</div><div class="msv" id="m-invest">0円</div></div>
+    </div>
+    <div class="msns">
+      <button class="snsbtn snsX" onclick="doShare('x')">𝕏 X</button>
+      <button class="snsbtn snsFb" onclick="doShare('fb')">f Facebook</button>
+      <button class="snsbtn snsIg" onclick="doShare('ig')">📷 Instagram</button>
+      <button class="snsbtn snsLine" onclick="doShare('line')">LINE</button>
+    </div>
+    <button class="mcls" onclick="closeShare()">閉じる</button>
+  </div>
+</div>
+
+<script>
+
+
+function fmt(n){
+  // 1億以上（=100,000,000以上）
+  if(Math.abs(n)>=100000000){
+    const oku=(n/100000000);
+    return oku.toFixed(1)+'億円';
+  }
+  // 1,000万以上（=10,000,000以上）→ カンマ入り万円
+  if(Math.abs(n)>=10000000){
+    const man=Math.round(n/10000);
+    return man.toLocaleString('ja-JP')+'万円';
+  }
+  // 1万以上
+  if(Math.abs(n)>=10000){
+    return Math.round(n/10000)+'万円';
+  }
+  return Math.round(n).toLocaleString('ja-JP')+'円';
+}
+
+// Tick builder - accurate absolute positioning
+function buildTabs(cid, ticks, smin, smax, curVal, sid){
+  const el=document.getElementById(cid);
+  el.innerHTML='';
+  const range=smax-smin;
+  ticks.forEach(tk=>{
+    const pct=(tk.v-smin)/range*100;
+    const sp=document.createElement('span');
+    sp.style.left=pct+'%';
+    sp.dataset.v=tk.v;
+    const active=Math.abs(tk.v-curVal)<1;
+    if(active){
+      if(tk.v<0)sp.className='hn';
+      else if(tk.v===0)sp.className='hz';
+      else sp.className='hp';
+    }
+    sp.innerHTML=tk.label+(tk.sub?`<span class="tsub">${tk.sub}</span>`:'');
+    sp.addEventListener('click',()=>{document.getElementById(sid).value=tk.v;update();});
+    el.appendChild(sp);
+  });
+}
+
+const MT=[
+  {v:-400000,label:'-40万',sub:'大負け'},
+  {v:-300000,label:'-30万',sub:''},
+  {v:-200000,label:'-20万',sub:''},
+  {v:-100000,label:'-10万',sub:''},
+  {v:-50000, label:'-5万', sub:''},
+  {v:0,      label:'0',    sub:'損失なし'},
+];
+const RT=[
+  {v:2, label:'2%', sub:'定期預金'},
+  {v:5, label:'5%', sub:'先進国株'},
+  {v:7, label:'7%', sub:'オルカン'},
+  {v:10,label:'10%',sub:'S&P500'},
+  {v:12,label:'12%',sub:'Nasdaq'},
+];
+const DT=[
+  {v:0,       label:'0円',  sub:'借金なし'},
+  {v:500000,  label:'50万', sub:''},
+  {v:1000000, label:'100万',sub:''},
+  {v:3000000, label:'300万',sub:''},
+  {v:5000000, label:'500万',sub:''},
+  {v:10000000,label:'1000万',sub:'上限'},
+];
+const DRT=[
+  {v:3, label:'3%', sub:'銀行'},
+  {v:8, label:'8%', sub:'カード'},
+  {v:12,label:'12%',sub:'ローン'},
+  {v:15,label:'15%',sub:'消費者金融'},
+  {v:18,label:'18%',sub:'上限金利'},
+  {v:20,label:'20%',sub:'闇金注意'},
+];
+const YT=[
+  {v:5, label:'5年', sub:''},
+  {v:10,label:'10年',sub:''},
+  {v:20,label:'20年',sub:''},
+  {v:30,label:'30年',sub:''},
+  {v:40,label:'40年',sub:''},
+];
+
+const RATEL={
+  2:'📌 定期預金：安全だがほぼ増えない（日本の過去平均水準）',
+  2.5:'📌 定期預金（高金利）',3:'📌 国債・MMF相当',
+  3.5:'📌 バランス型投資信託',4:'📌 債券ファンド：低リスク',
+  4.5:'📌 先進国債券ファンド',5:'📌 先進国株式インデックス（保守的試算）',
+  5.5:'📌 先進国株式インデックス',6:'📌 先進国株式インデックス（平均的試算）',
+  6.5:'📌 全世界株式（保守的試算）',
+  7:'📌 オルカン（eMAXIS Slim 全世界株式）：過去30年の長期平均実績',
+  7.5:'📌 全世界株式（楽観的試算）',8:'📌 先進国株式（楽観的試算）',
+  8.5:'📌 S&P500（保守的試算）',
+  9:'📌 S&P500（米国株式インデックス）：歴史的長期平均（配当込み）',
+  9.5:'📌 S&P500（標準的試算）',
+  10:'📌 S&P500相当：過去50年の配当込み平均リターン',
+  10.5:'📌 S&P500（楽観的試算）',
+  11:'📌 成長株ファンド・テックETF相当',
+  11.5:'📌 Nasdaq 100 / QQQ：設定来（1999年〜）平均約10.6%・過去20年平均約13%',
+  12:'📌 Nasdaq 100 / QQQ：過去10年平均約20%（参考値。変動大きくリスク高）',
+};
+
+function compute(mpl, years, rate, debt, debtRate){
+  let invest=0, totalLoss=0, remainDebt=debt;
+  const mr=rate/100/12;
+  const dmr=debtRate/100/12; // 借金の月利
+  const rows=[];
+  for(let y=1;y<=years;y++){
+    for(let m=0;m<12;m++){
+      // 毎月の損失 = ギャンブル負け額 + 借金の利息
+      const monthlyInterest = remainDebt > 0 ? remainDebt * dmr : 0;
+      const gambLoss = mpl<0 ? Math.abs(mpl) : 0;
+      const totalMonthlyLoss = gambLoss + monthlyInterest;
+      // 借金残高は利息だけ増え続ける（返済なし想定）
+      remainDebt = remainDebt > 0 ? remainDebt * (1 + dmr) : 0;
+      // 投資：毎月の損失額を投資に回せたと仮定
+      invest = (invest + totalMonthlyLoss) * (1 + mr);
+      totalLoss += totalMonthlyLoss;
+    }
+    rows.push({
+      year:y,
+      totalLoss:Math.round(totalLoss),
+      invest:Math.round(invest),
+      gain:Math.round(invest-totalLoss),
+      debtBalance:Math.round(remainDebt),
+    });
+  }
+  return rows;
+}
+
+function drawChart(rows, mpl){
+  const canvas=document.getElementById('main-chart');
+  const wrap=canvas.parentElement;
+  const ctx=canvas.getContext('2d');
+  const dpr=window.devicePixelRatio||1;
+  const W=wrap.offsetWidth||600, H=wrap.offsetHeight||260;
+  canvas.width=W*dpr; canvas.height=H*dpr; ctx.scale(dpr,dpr);
+
+  const pad={top:16,right:20,bottom:36,left:76};
+  const cW=W-pad.left-pad.right, cH=H-pad.top-pad.bottom;
+
+  // 0年の起点を先頭に追加
+  const allRows = [{year:0, totalLoss:0, invest:0, gain:0, debtBalance:0}, ...rows];
+  const n = allRows.length; // 0年〜N年
+
+  // 最大値・最小値
+  const maxV = Math.max(...rows.map(r=>r.invest), 1) * 1.08;
+  const minV = mpl<0 ? Math.min(...rows.map(r=>-r.totalLoss)) * 1.08 : 0;
+  const totalRange = maxV - minV;
+
+  // 座標変換：インデックスは allRows基準
+  const xp = i => pad.left + (i/(n-1))*cW;
+  const yp = v => pad.top + (1 - (v-minV)/totalRange)*cH;
+  const y0 = yp(0); // ゼロライン
+
+  ctx.clearRect(0,0,W,H);
+
+  // ── グリッド（上部：プラス側） ──
+  const steps = 4;
+  for(let i=0;i<=steps;i++){
+    const v = minV + (totalRange/steps)*i;
+    const y = yp(v);
+    ctx.setLineDash([3,4]);
+    ctx.strokeStyle = v===0 ? '#999' : '#E0DEFF';
+    ctx.lineWidth = v===0 ? 1.2 : 1;
+    ctx.beginPath(); ctx.moveTo(pad.left,y); ctx.lineTo(W-pad.right,y); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle='#AAA';
+    ctx.font="10px 'Courier New',monospace";
+    ctx.textAlign='right';
+    // ラベル
+    let lb;
+    const absV = Math.abs(v);
+    const sign = v<0 ? '-' : '';
+    if(absV>=100000000) lb=sign+(absV/100000000).toFixed(1)+'億円';
+    else if(absV>=10000000) lb=sign+Math.round(absV/10000).toLocaleString('ja-JP')+'万円';
+    else if(absV>=10000) lb=sign+Math.round(absV/10000)+'万円';
+    else if(absV===0) lb='0';
+    else lb=sign+Math.round(absV).toLocaleString('ja-JP')+'円';
+    ctx.fillText(lb, pad.left-5, y+4);
+  }
+
+  // ── X軸ラベル ──
+  const xs=Math.max(1,Math.floor((n-1)/6));
+  ctx.fillStyle='#AAA'; ctx.font='10px sans-serif'; ctx.textAlign='center';
+  allRows.forEach((r,i)=>{
+    if(i===0||i%xs===0||i===n-1) ctx.fillText(r.year+'年',xp(i),H-8);
+  });
+
+  // ── ゼロライン ──
+  ctx.strokeStyle='#999'; ctx.lineWidth=1; ctx.setLineDash([]);
+  ctx.beginPath(); ctx.moveTo(pad.left,y0); ctx.lineTo(W-pad.right,y0); ctx.stroke();
+
+  // ── ギャンブル累計損失エリア（0以下・赤） ──
+  if(mpl<0){
+    // 損失エリア塗りつぶし（0年=0円からスタート）
+    ctx.beginPath();
+    ctx.moveTo(xp(0), y0);
+    allRows.forEach((r,i)=>{
+      ctx.lineTo(xp(i), yp(-r.totalLoss));
+    });
+    ctx.lineTo(xp(n-1), y0);
+    ctx.closePath();
+    ctx.fillStyle='rgba(192,64,32,.12)';
+    ctx.fill();
+
+    // 損失ライン
+    ctx.beginPath();
+    allRows.forEach((r,i)=>{
+      const x=xp(i), y=yp(-r.totalLoss);
+      i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+    });
+    ctx.strokeStyle='#C04020'; ctx.lineWidth=2; ctx.setLineDash([]);
+    ctx.stroke();
+
+    // 損失ライン終点ラベル
+    const last=rows[rows.length-1];
+    ctx.font="10px 'Courier New',monospace";
+    ctx.textAlign='right';
+    ctx.fillStyle='#C04020';
+    ctx.fillText('-'+fmt(last.totalLoss), xp(n-1)-3, yp(-last.totalLoss)+14);
+  }
+
+  // ── 投資：元本エリア（薄緑・0年から） ──
+  ctx.beginPath();
+  allRows.forEach((r,i)=>{ const x=xp(i),y=yp(r.totalLoss); i===0?ctx.moveTo(x,y):ctx.lineTo(x,y); });
+  ctx.lineTo(xp(n-1),y0); ctx.lineTo(xp(0),y0); ctx.closePath();
+  ctx.fillStyle='rgba(46,139,46,.13)'; ctx.fill();
+
+  // ── 複利益エリア（濃い緑・0年から） ──
+  ctx.beginPath();
+  allRows.forEach((r,i)=>{ i===0?ctx.moveTo(xp(i),yp(r.invest)):ctx.lineTo(xp(i),yp(r.invest)); });
+  for(let i=n-1;i>=0;i--){ ctx.lineTo(xp(i),yp(allRows[i].totalLoss)); }
+  ctx.closePath();
+  ctx.fillStyle='rgba(46,180,46,.22)'; ctx.fill();
+
+  // ── 投資合計ライン（0年から） ──
+  ctx.beginPath();
+  allRows.forEach((r,i)=>{ const x=xp(i),y=yp(r.invest); i===0?ctx.moveTo(x,y):ctx.lineTo(x,y); });
+  ctx.strokeStyle='#2E8B2E'; ctx.lineWidth=2.5; ctx.setLineDash([]);
+  ctx.stroke();
+
+  // ── 投資終点ラベル ──
+  const last=rows[rows.length-1], lx=xp(n-1);
+  ctx.font="bold 11px 'Courier New',monospace"; ctx.textAlign='right';
+  ctx.fillStyle='#2E8B2E';
+  ctx.fillText(fmt(last.invest), lx-3, yp(last.invest)-6);
+
+  // ── 元本ライン終点ラベル ──
+  if(mpl<0 && last.gain>0){
+    ctx.font="10px 'Courier New',monospace"; ctx.textAlign='right';
+    ctx.fillStyle='rgba(46,139,46,.8)';
+    ctx.fillText('元本 '+fmt(last.totalLoss), lx-3, yp(last.totalLoss)+14);
+  }
+}
+
+let _shareText='';
+function openShare(){
+  const mpl=parseInt(document.getElementById('monthly').value);
+  const years=parseInt(document.getElementById('years').value);
+  const rate=parseFloat(document.getElementById('rate').value);
+  const debt=parseInt(document.getElementById('debt').value);
+  const debtRate=parseFloat(document.getElementById('debtrate').value);
+  const rows=compute(mpl,years,rate,debt,debtRate);
+  const last=rows[rows.length-1];
+  document.getElementById('m-gamble').textContent=mpl<0?fmt(last.totalLoss):'0円';
+  document.getElementById('m-invest').textContent=fmt(last.invest);
+  _shareText=mpl<0
+    ?`【ギャンブル vs 投資】${years}年間の負け額を投資に回していたら${fmt(last.invest)}になっていた！ #ギャンブル依存 #投資`
+    :`【ギャンブル vs 投資】${years}年間積み立て投資したら${fmt(last.invest)}になる！ #投資`;
+  document.getElementById('mbg').classList.add('open');
+}
+function closeShare(){document.getElementById('mbg').classList.remove('open');}
+function doShare(sns){
+  const url=encodeURIComponent(location.href);
+  const text=encodeURIComponent(_shareText);
+  if(sns==='x')window.open('https://twitter.com/intent/tweet?text='+text+'&url='+url,'_blank');
+  else if(sns==='fb')window.open('https://www.facebook.com/sharer/sharer.php?u='+url+'&quote='+text,'_blank');
+  else if(sns==='ig'){
+    navigator.clipboard.writeText(_shareText+' '+location.href)
+      .then(()=>alert('テキストをコピーしました！\nInstagramのストーリーやプロフィールに貼り付けてください📸'))
+      .catch(()=>alert('コピーできませんでした。手動でコピー：\n'+_shareText));
+  }
+  else if(sns==='line')window.open('https://line.me/R/msg/text/?'+encodeURIComponent(_shareText+' '+location.href),'_blank');
+}
+
+let tableStep=5;
+function setStep(n){
+  tableStep=n;
+  document.querySelectorAll('.tbtn').forEach((b,i)=>b.classList.toggle('active',(i===0&&n===5)||(i===1&&n===1)));
+  update();
+}
+
+// テーブルだけ更新（グラフを再描画しない）
+function setStepSafe(n){
+  tableStep=n;
+  document.querySelectorAll('.tbtn').forEach((b,i)=>b.classList.toggle('active',(i===0&&n===5)||(i===1&&n===1)));
+  // グラフは触らず、テーブルだけ再描画
+  const mpl=parseInt(document.getElementById('monthly').value);
+  const years=parseInt(document.getElementById('years').value);
+  const rate=parseFloat(document.getElementById('rate').value);
+  const debt=parseInt(document.getElementById('debt').value);
+  const debtRate=parseFloat(document.getElementById('debtrate').value);
+  const rows=compute(mpl,years,rate,debt,debtRate);
+  const tbody=document.getElementById('tbody');
+  tbody.innerHTML='';
+  rows.forEach(r=>{
+    if(r.year%tableStep!==0&&r.year!==years)return;
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${r.year}年後</td>`
+      +`<td class="${mpl<0?'cg':''}">${mpl<0?'-'+fmt(r.totalLoss):'0円'}</td>`
+      +`<td class="ci">${fmt(r.invest)}</td>`
+      +`<td class="ci">+${fmt(r.gain)}</td>`
+      +`<td class="${mpl<0?'cg':''}">${mpl<0?'-'+fmt(r.totalLoss):'0円'}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function update(){
+  const mpl=parseInt(document.getElementById('monthly').value);
+  const years=parseInt(document.getElementById('years').value);
+  const rate=parseFloat(document.getElementById('rate').value);
+  const debt=parseInt(document.getElementById('debt').value);
+  const debtRate=parseFloat(document.getElementById('debtrate').value);
+
+  // Monthly val - no ¥
+  const mEl=document.getElementById('monthly-val');
+  if(mpl<0){mEl.textContent='-'+fmt(-mpl).replace('円','').replace('億円','億');mEl.className='sgv neg';}
+  else{mEl.textContent='0（損失なし）';mEl.className='sgv zer';}
+
+  document.getElementById('years-val').textContent=years+'年';
+  document.getElementById('rate-val').textContent=rate.toFixed(1)+'%';
+
+  // Ticks (accurate positions)
+  buildTabs('tabs-monthly',MT,-400000,0,mpl,'monthly');
+  buildTabs('tabs-rate',RT,2,12,rate,'rate');
+  buildTabs('tabs-years',YT,5,40,years,'years');
+  buildTabs('tabs-debt',DT,0,10000000,debt,'debt');
+  buildTabs('tabs-debtrate',DRT,3,20,debtRate,'debtrate');
+
+  // Loss badge
+  const badge=document.getElementById('loss-badge');
+  if(mpl<0){badge.textContent='📌 月'+fmt(-mpl)+'の負け = 年間'+fmt(-mpl*12)+'が消えています';badge.className='badge bd';}
+  else{badge.textContent='📌 損失なし（シミュレーションのみ）';badge.className='badge bn';}
+
+  const rk=Math.round(rate*2)/2;
+  document.getElementById('rate-badge').textContent=RATEL[rk]||RATEL[Math.round(rate)]||'';
+
+  // 借金表示
+  document.getElementById('debt-val').textContent=debt>0?'-'+fmt(debt):'0円';
+  document.getElementById('debtrate-val').textContent=debtRate.toFixed(1)+'%';
+
+  const monthlyInterest = debt>0 ? Math.round(debt*(debtRate/100/12)) : 0;
+  const debtBadge=document.getElementById('debt-badge');
+  if(debt>0){
+    debtBadge.textContent='📌 月の利息：'+fmt(monthlyInterest)+' / 年間：'+fmt(monthlyInterest*12)+'が利息で消えます';
+    debtBadge.className='badge bd';
+  }else{
+    debtBadge.textContent='📌 借金なし';
+    debtBadge.className='badge bn';
+  }
+  const DRATEL={3:'📌 銀行カードローン（低金利）',5:'📌 信用金庫・地方銀行',
+    8:'📌 クレジットカードキャッシング',10:'📌 信販会社ローン',
+    12:'📌 カードローン（中程度）',14:'📌 消費者金融（低め）',
+    15:'📌 消費者金融（標準）：利息制限法の上限に近い',
+    17:'📌 消費者金融（高め）',18:'📌 消費者金融の法定上限金利（年18%）',
+    20:'📌 ⚠️ 出資法上限超え。闇金の可能性があります'};
+  const drk=Math.round(debtRate*2)/2;
+  document.getElementById('debtrate-badge').textContent=DRATEL[drk]||DRATEL[Math.round(debtRate)]||'📌 借金の金利';
+
+  const rows=compute(mpl,years,rate,debt,debtRate);
+  const last=rows[rows.length-1];
+
+  // Results
+  document.getElementById('r-total').textContent=mpl<0?'-'+fmt(last.totalLoss):'0円';
+  document.getElementById('r-invest').textContent=fmt(last.invest);
+  document.getElementById('r-isub').textContent='含み益 +'+fmt(last.gain);
+  // 差額 = 投資最終資産 + 損失累計（ギャンブルしなければ両方手に入った）
+  const totalDiff = last.invest + (mpl<0 ? last.totalLoss : 0);
+  document.getElementById('r-diff').textContent='+'+fmt(totalDiff);
+
+  drawChart(rows,mpl);
+
+  // Table
+  const tbody=document.getElementById('tbody');tbody.innerHTML='';
+  rows.forEach(r=>{
+    if(r.year%tableStep!==0&&r.year!==years)return;
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${r.year}年後</td>`
+      +`<td class="${mpl<0?'cg':''}">${mpl<0?'-'+fmt(r.totalLoss):'0円'}</td>`
+      +`<td class="ci">${fmt(r.invest)}</td>`
+      +`<td class="ci">+${fmt(r.gain)}</td>`
+      +`<td class="${mpl<0?'cg':''}">${mpl<0?'-'+fmt(r.totalLoss):'0円'}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+['monthly','years','rate','debt','debtrate'].forEach(id=>document.getElementById(id).addEventListener('input',update));
+update();
+window.addEventListener('resize',update);
+</script>
+</body>
+</html>
